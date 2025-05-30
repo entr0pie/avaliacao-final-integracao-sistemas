@@ -1,5 +1,8 @@
 const express = require('express');
 const redis = require('redis');
+const axios = require("axios");
+
+const URL_EVENTS_SERVICE = 'http://localhost:5000/'
 
 const app = express();
 app.use(express.json());
@@ -31,7 +34,15 @@ app.get('/sensor-data', async (req, res) => {
 
     const sensorData = getSensorData();
     await client.set('sensor-data', JSON.stringify(sensorData));
+    
     return res.send(sensorData);
+});
+
+app.post('/alert', async (req, res) => {
+    const { id, description } = req.body;
+    const response = (await axios.post(URL_EVENTS_SERVICE + '/events', { id, description })).data;
+
+    return res.send(response);
 });
 
 app.listen(3000, () => console.log('http://localhost:3000/'));
